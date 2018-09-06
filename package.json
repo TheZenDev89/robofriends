@@ -6,7 +6,8 @@
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-scripts": "1.1.4",
-    "tachyons": "^4.10.0"
+    "tachyons": "^4.10.0",
+    "url-parse": "^1.4.3"
   },
   "scripts": {
     "start": "react-scripts start",

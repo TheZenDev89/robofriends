@@ -1,44 +1,39 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { setSearchField, requestRobots } from '../actions';
+
 import CardList from '../components/CardList';
 import SearchBox from '../components/SearchBox';
 import Scroll from '../components/Scroll';
 import ErrorBoundary from '../components/ErrorBoundary';
+
 import './App.css';
 
-import { setSearchField } from '../actions';
-
-const mapStateToProps = state => {
+// parameter state comes from index.js provider store state(rootReducers)
+const mapStateToProps = (state) => {
     return {
-        searchField: state.searchField
+        searchField: state.searchRobots.searchField,
+        robots: state.requestRobots.robots,
+        isPending: state.requestRobots.isPending,
     }
 }
 
+// dispatch the DOM changes to call an action. note mapStateToProps returns object, mapDispatchToProps returns function
+// the function returns an object then uses connect to change the data from redecers.
 const mapDispatchToProps = (dispatch) => {
     return {
-        onSearchChange: (event) => dispatch(setSearchField(event.target.value))
+        onSearchChange: (event) => dispatch(setSearchField(event.target.value)),
+        onRequestRobots: () => requestRobots(requestRobots())
     }
 }
 
 class App extends Component {
-    constructor () {
-        super () //must use super() after constructor
-        this.state = { //this.state is referring to the state of the app
-            robots: [],
-        }
-    }
-
     componentDidMount () {
-        fetch('https://jsonplaceholder.typicode.com/users') //fetch data from the API
-            .then(response => response.json()) //convert fetch() data to json
-            .then(users => this.setState({ robots: users })) //updating users with setState and convert to a JavaScript object to use
+        this.props.onRequestRobots();
     }
 
     render () {
-        //this.state is referring to the state of the app
-        //the line below is because we used this.state a lot in the lines that follow it
-        const { robots } = this.state; 
-        const { searchField, onSearchChange } = this.props;
+        const { robots, searchField, onSearchChange, isPending } = this.props;
         const filteredRobots = robots.filter(robot => { 
             return robot.name.toLowerCase().includes(searchField.toLowerCase());
         })
@@ -47,9 +42,11 @@ class App extends Component {
                 <h1 className='f1'>RoboFriends</h1>
                 <SearchBox searchChange={onSearchChange}/>
                 <Scroll>
-                    <ErrorBoundary>
-                        <CardList robots = {filteredRobots}/>
-                    </ErrorBoundary>
+                    { isPending ? <h1>Loading</h1> :
+                        <ErrorBoundary>
+                            <CardList robots={filteredRobots} />
+                        </ErrorBoundary>
+                    }
                 </Scroll>
             </div>
         );
